@@ -6,11 +6,11 @@ from typing import Optional, Tuple, List, Union, Any
 
 from common.logger import logger
 
-from bot import Bot
-from multitool import ToolDefinition, ToolDataType
-from scrape import WebPage
-from search import GoogleSearch
-from utils import (
+from .bot import Bot
+from .multitool import ToolDefinition, ToolDataType
+from .scrape import WebPage
+from .search import GoogleSearch
+from .utils import (
     CONTEXT_LENGTHS,
     find_text_under_header,
     clip_text,

@@ -2,9 +2,9 @@ from typing import Any
 
 from common.logger import logger
 
-from bjork import bjork
-from multitool import ToolDefinition, ToolDataType
-from utils import DEFAULT_FLAGSHIP_MODEL
+from .bjork import bjork
+from .multitool import ToolDefinition, ToolDataType
+from .utils import DEFAULT_FLAGSHIP_MODEL
 
 
 RA_TOOL_DOC = """Use this tool if you would like to research a topic. You can ask this tool a question and it will gather information for you."""
@@ -27,7 +27,6 @@ class ResearchAssistant(ToolDefinition):
         model_name: str = DEFAULT_FLAGSHIP_MODEL,
         bjork_kwargs: dict = None,
         considered_web_pages_: list = None,
-        considered_proprietary_data_: list = None,
     ):
         super().__init__(
             tool_name="research_assistant",
@@ -39,7 +38,6 @@ class ResearchAssistant(ToolDefinition):
         self.model_name = model_name
         self.bjork_kwargs = bjork_kwargs
         self.considered_web_pages_ = considered_web_pages_
-        self.considered_proprietary_data_ = considered_proprietary_data_
 
     def tool_fn(self, arguments: dict) -> Any:
         bjork_context = f"{arguments['research_intent']}"
@@ -67,7 +65,6 @@ class ResearchAssistant(ToolDefinition):
                 query=arguments["research_question"],
                 context=bjork_context,
                 considered_web_pages_=self.considered_web_pages_,
-                considered_proprietary_data_=self.considered_proprietary_data_,
                 **full_bjork_kwargs,
             )
         except Exception as e:

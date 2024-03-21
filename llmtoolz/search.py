@@ -6,9 +6,9 @@ from typing import List, Union, Optional, Dict
 import numpy as np
 from apify_client import ApifyClient
 
-from bot import batch_embed, embed
-from scrape import WebPage, NewsArticle
-from utils import custom_memoize as memoize
+from .bot import batch_embed, embed
+from .scrape import WebPage, NewsArticle
+from .utils import custom_memoize as memoize
 from common.utils import get_key
 
 

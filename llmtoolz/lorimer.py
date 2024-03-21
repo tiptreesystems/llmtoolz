@@ -5,15 +5,15 @@ from typing import Optional
 
 from common.logger import logger
 
-from althea.arnar import faux_arnar, arnar
-from althea.bot import Bot
-from althea.lorimer_utils import (
+from .arnar import faux_arnar, arnar
+from .bot import Bot
+from .lorimer_utils import (
     NOT_FORMULATED_YET,
     NOT_AVAILABLE_THIS_IS_ROOT_SECTION,
     Section,
 )
 
-from althea.utils import find_text_under_header, find_markdown_block, DEFAULT_FLAGSHIP_MODEL
+from .utils import find_text_under_header, find_markdown_block, DEFAULT_FLAGSHIP_MODEL
 
 
 def build_executor(parallel: bool, num_threads: int):
@@ -47,7 +47,9 @@ def produce_document_tree(
 
     # Create a bot for the forward model
     forward_bot = Bot(
-        name="lorimer_forward", model_name=DEFAULT_FLAGSHIP_MODEL, fallback_when_out_of_context=True
+        name="lorimer_forward",
+        model_name=DEFAULT_FLAGSHIP_MODEL,
+        fallback_when_out_of_context=True,
     )
     user_prompt = forward_bot.format_user_prompt(
         research_question=research_question,
@@ -149,7 +151,11 @@ def update_abstracts_from_children(research_question: str, section: Section) -> 
 
     logger.debug(f"Updating section: {section.title}")
     # Once all children are updated, then we can update this section
-    bot = Bot(name="lorimer_backward", model_name=DEFAULT_FLAGSHIP_MODEL, fallback_when_out_of_context=True)
+    bot = Bot(
+        name="lorimer_backward",
+        model_name=DEFAULT_FLAGSHIP_MODEL,
+        fallback_when_out_of_context=True,
+    )
     user_prompt = bot.format_user_prompt(
         research_question=research_question,
         section_title=section.title,
@@ -236,7 +242,8 @@ def update_from_feedback(query: str, section: Section, num_threads: int = 5) -> 
         section.subsections = list(
             executor.map(
                 lambda subsection: update_from_feedback(
-                    query=query, section=subsection,
+                    query=query,
+                    section=subsection,
                 ),
                 section.subsections,
             )
@@ -301,7 +308,9 @@ def lorimer(
         return research_statement
 
     research_statement = produce_research_statement(question_with_context)
-    root_section.content = "## Research Statement\n" + research_statement + "\n\n" + root_section.content
+    root_section.content = (
+        "## Research Statement\n" + research_statement + "\n\n" + root_section.content
+    )
 
     if log_path:
         root_section.persist(log_path + "_forward.json")

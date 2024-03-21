@@ -5,12 +5,11 @@ import openai.error
 from sklearn.mixture import GaussianMixture
 import numpy as np
 from common.logger import logger
-
-from bot import Bot
 from fuzzysearch import find_near_matches
 from functools import reduce
 
-from utils import (
+from .bot import Bot
+from .utils import (
     count_tokens_in_str,
     CONTEXT_LENGTHS,
     DEFAULT_FLAGSHIP_MODEL,

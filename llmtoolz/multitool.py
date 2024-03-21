@@ -6,8 +6,8 @@ from typing import Dict, List, Optional, Any, Tuple
 
 from common.logger import logger
 
-from bot import Bot
-from utils import find_text_under_header, find_json_block, DEFAULT_FLAGSHIP_MODEL
+from .bot import Bot
+from .utils import find_text_under_header, find_json_block, DEFAULT_FLAGSHIP_MODEL
 
 
 class ToolDataType(Enum):

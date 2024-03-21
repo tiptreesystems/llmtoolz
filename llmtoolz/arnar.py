@@ -3,17 +3,17 @@ from typing import Optional, List
 import pandas as pd
 from common.logger import logger
 
-from arnar_utils import ResearchAssistant
-from bot import Bot
-from multitool import find_tool, ToolBelt
-from utils import (
+from .arnar_utils import ResearchAssistant
+from .bot import Bot
+from .multitool import find_tool, ToolBelt
+from .utils import (
     find_markdown_block,
     DEFAULT_FLAGSHIP_MODEL,
     DEFAULT_FLAGSHIP_LONG_CONTEXT_MODEL,
     find_text_under_header,
 )
 
-from scrape import WebPage
+from .scrape import WebPage
 
 
 RESPONSE_INSTRUCTIONS = """# Instructions for Formulating your Final Response
@@ -60,13 +60,13 @@ def arnar(
     question: str,
     *,
     context: Optional[str] = None,
-    num_target_words: Optional[int] = None,
     max_num_tool_calls: int = 3,
     max_num_steps: int = 10,
     model_name: str = DEFAULT_FLAGSHIP_MODEL,
     bjork_kwargs: Optional[dict] = None,
     considered_web_pages_: Optional[List["WebPage"]] = None,
     document_research_question: Optional[str] = None,
+    max_num_bjork_calls: int = 3,
 ) -> str:
     bot = Bot(name="arnar", model_name=model_name)
 

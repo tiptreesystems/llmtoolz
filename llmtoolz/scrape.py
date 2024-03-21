@@ -27,9 +27,9 @@ from goose3 import Goose, Configuration
 from common.logger import logger
 from urlextract import URLExtract
 
-from bot import embed, Bot
-from retrieve import retrieve
-from utils import (
+from .bot import embed, Bot
+from .retrieve import retrieve
+from .utils import (
     custom_memoize,
     to_normed_array,
     normalize_scores,
@@ -40,8 +40,12 @@ from utils import (
     DEFAULT_TOKENIZER_MODEL,
     DEFAULT_VISION_MODEL,
     DEFAULT_FAST_MODEL,
+    flatten_dict,
+    format_string,
+    url_to_domain,
+    get_path,
+    get_key,
 )
-from utils import flatten_dict, format_string, url_to_domain, get_path, get_key
 
 
 class WebScraper:

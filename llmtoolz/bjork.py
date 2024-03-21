@@ -4,18 +4,18 @@ from typing import Optional, List, Tuple
 import pandas as pd
 from common.logger import logger
 
-from bjork_utils import (
+from .bjork_utils import (
     SearchAndSummarize,
     QueryWebPage,
     PeopleLookup,
 )
-from bot import Bot
-from multitool import (
+from .bot import Bot
+from .multitool import (
     ToolBelt,
     find_tool,
 )
-from scrape import WebPage
-from utils import (
+from .scrape import WebPage
+from .utils import (
     find_text_under_header,
     find_json_block,
     DEFAULT_FLAGSHIP_MODEL,

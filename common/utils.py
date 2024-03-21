@@ -9,12 +9,11 @@ from common.logger import logger
 from pydantic import BaseModel
 from enum import Enum
 
-from common.constants import PRICE_PER_KILOTOKEN, VENDOR_QUERY_PRICE
+from common.constants import PRICE_PER_KILOTOKEN
 
 
 class ResearchType(Enum):
     PUBLIC_RESEARCH = "public_research"
-    PROPRIETARY_DATA_ACCESS = "proprietary_data_access"
     EXPERT_RESEARCH = "expert_research"
 
 
@@ -137,46 +136,3 @@ class AltheaConfig:
         if path is None:
             raise ValueError(f"Environment variable {variable} not set.")
         return cls.from_path(path)
-
-
-class UsageRecord(BaseModel):
-    id: Optional[int] = None
-    answer_id: str
-    name: str
-    user_id: str
-    vendor_id: Optional[str]
-    research_type: str
-    usage_description: str
-    usage_amount: float
-    log_path: str
-    processed: bool
-    time: float
-
-    def __post_init__(self):
-        assert ResearchType(self.research_type) in ResearchType
-        assert self.usage_amount >= 0
-        assert self.time >= 0
-
-    @property
-    def timestamp(self) -> datetime:
-        return datetime.fromtimestamp(self.time)
-
-    @property
-    def price(self) -> float:
-        return self.usage_amount * self.get_price_per_unit()
-
-    def get_price_per_unit(self) -> float:
-        if self.research_type == ResearchType.PUBLIC_RESEARCH.value:
-            return PRICE_PER_KILOTOKEN / 1000
-        elif self.research_type == ResearchType.PROPRIETARY_DATA_ACCESS.value:
-            return VENDOR_QUERY_PRICE[self.name]
-        elif self.research_type == ResearchType.EXPERT_RESEARCH.value:
-            return VENDOR_QUERY_PRICE[self.vendor_id]
-        else:
-            raise ValueError(f"Unknown usage type {self.usage_type}")
-
-    @classmethod
-    def from_model_dump(cls, model_dump: dict) -> "UsageRecord":
-        if isinstance(model_dump["research_type"], ResearchType):
-            model_dump["research_type"] = model_dump["research_type"].value
-        return cls(**model_dump)

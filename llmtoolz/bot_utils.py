@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from copy import deepcopy
 
-from utils import multiline_input
+from .utils import multiline_input
 
 if TYPE_CHECKING:
     from bot import Bot

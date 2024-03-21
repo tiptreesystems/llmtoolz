@@ -11,7 +11,7 @@ from docx.text.paragraph import Paragraph
 
 from common.logger import logger
 
-from utils import find_text_under_header
+from .utils import find_text_under_header
 from common.utils import get_path
 
 NOT_FORMULATED_YET = "Not formulated yet."

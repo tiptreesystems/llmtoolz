@@ -1,4 +1,3 @@
-import base64
 import json
 import os
 import re
@@ -15,9 +14,11 @@ from common.logger import logger
 from typing import Optional, List, Dict, Callable, Tuple, Any, Union, Mapping
 import backoff as backoff
 from hashlib import sha256
+import openai
+from openai_functions import FunctionWrapper
 
-from bot_utils import OutOfTokenCapError
-from utils import (
+from .bot_utils import OutOfTokenCapError
+from .utils import (
     custom_memoize as memoize,
     clip_text,
     parse_prompts,
@@ -33,11 +34,11 @@ from utils import (
     DEFAULT_FLAGSHIP_MODEL,
     image_to_base64,
     find_text_under_header,
+    AltheaTimeoutException,
+    format_string,
+    get_path
 )
-import openai
-from openai_functions import FunctionWrapper
 
-from utils import AltheaTimeoutException, format_string, get_path
 
 
 @dataclass
