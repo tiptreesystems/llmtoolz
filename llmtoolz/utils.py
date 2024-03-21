@@ -393,14 +393,14 @@ def parse_json(text: str, raise_on_fail: bool = True) -> Optional[Union[dict, li
             return None
 
 
-class AltheaTimeoutException(Exception):
+class TimeoutException(Exception):
     pass
 
 
 def timeout(seconds):
     def decorator(func):
         def _handle_timeout(signum, frame):
-            raise AltheaTimeoutException(
+            raise TimeoutException(
                 f"Function '{func.__name__}' timed out after {seconds} seconds"
             )
 
@@ -813,141 +813,3 @@ def find_outlier_threshold(scores: np.ndarray) -> float:
     # Find the threshold
     threshold = bin_edges[last_change_point]
     return threshold
-
-
-# ------ Backchannel ------
-
-BACKCHANNEL_BASE = "data/backchannel"
-
-
-@dataclass
-class BackchannelMessage:
-    user_id: str
-    thread_id: str
-    from_: str
-    to: str
-    text: str
-    timestamp: Optional[str] = None
-    uuid_str: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = field(default_factory=dict)
-
-    def __post_init__(self):
-        if not self.timestamp:
-            self.timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        if not self.uuid_str:
-            self.uuid_str = uuid.uuid4().hex
-
-    def get_path(self):
-        return get_path(
-            os.path.join(
-                BACKCHANNEL_BASE,
-                self.user_id,
-                self.thread_id,
-                f"{self.from_}_to_{self.to}",
-                f"{self.timestamp}_{self.uuid_str}.json",
-            )
-        )
-
-    @property
-    def unix_timestamp(self) -> float:
-        return time.mktime(time.strptime(self.timestamp, "%Y%m%d%H%M%S"))
-
-    def to_json(self):
-        return json.dumps(self.__dict__, indent=2)
-
-    def save(self) -> "BackchannelMessage":
-        with open(self.get_path(), "w") as f:
-            f.write(self.to_json())
-        return self
-
-    @classmethod
-    def from_json(cls, json_path):
-        with open(json_path, "r") as f:
-            data = json.load(f)
-        # Support for "from" as a keyword
-        if "from" in data:
-            data["from_"] = data.pop("from")
-        return cls(**data)
-
-    def set_metadata(self, **keys_and_values) -> "BackchannelMessage":
-        self.metadata.update(keys_and_values)
-        return self
-
-    def get_metadata(self, key: str, default: Any = None) -> Any:
-        return self.metadata.get(key, default)
-
-
-@dataclass
-class BackchannelThread:
-    user_id: str
-    thread_id: str
-    from_: str
-    to: str
-
-    def get_messages(self, since: Optional[float] = None) -> List["BackchannelMessage"]:
-        path = get_path(
-            f"{BACKCHANNEL_BASE}/{self.user_id}/{self.thread_id}/{self.from_}_to_{self.to}"
-        )
-        glob_path = f"{path}/*.json"
-        messages = [BackchannelMessage.from_json(p) for p in glob.glob(glob_path)]
-        # Sort from oldest to newest
-        messages.sort(key=lambda m: m.unix_timestamp)
-        if since:
-            return [m for m in messages if m.unix_timestamp > since]
-        return messages
-
-    def describe(self) -> str:
-        return (
-            f"BackchannelThread(user_id={self.user_id}, thread_id={self.thread_id}, "
-            f"from_={self.from_}, to={self.to})"
-        )
-
-    def get_latest_message(self) -> Optional["BackchannelMessage"]:
-        messages = self.get_messages()
-        if messages:
-            return max(messages, key=lambda m: m.unix_timestamp)
-        else:
-            return None
-
-    @classmethod
-    def from_path(cls, path: str):
-        base_path = get_path(BACKCHANNEL_BASE)
-        if not path.startswith(base_path):
-            raise ValueError(f"Path {path} is not in the backchannel directory")
-        # Remove the base path
-        relative_path = os.path.relpath(path, base_path)
-        # Split the relative path into components
-        components = relative_path.split(os.sep)
-        # Parse the components
-        user_id = components[0]
-        thread_id = components[1]
-        from_, to = components[2].split("_to_")
-        return cls(user_id=user_id, thread_id=thread_id, from_=from_, to=to)
-
-
-@dataclass
-class Backchannel:
-    from_: Optional[str] = None
-    to: Optional[str] = None
-    user_id: Optional[str] = None
-    thread_id: Optional[str] = None
-
-    def get_threads(self) -> List[BackchannelThread]:
-        base_dir = get_path(BACKCHANNEL_BASE)
-        glob_pattern = os.path.join(
-            base_dir,
-            str(self.user_id) if self.user_id else "*",
-            str(self.thread_id) if self.thread_id else "*",
-            f"{self.from_ if self.from_ else '*'}_to_{self.to if self.to else '*'}",
-        )
-        paths = list(glob.glob(glob_pattern))
-        return [BackchannelThread.from_path(p) for p in paths]
-
-    def get_messages(self, since: Optional[float] = None) -> List[BackchannelMessage]:
-        threads = self.get_threads()
-        messages = []
-        for thread in threads:
-            messages.extend(thread.get_messages(since=since))
-        # Sort by timestamp
-        messages.sort(key=lambda m: m.unix_timestamp)
-        return messages

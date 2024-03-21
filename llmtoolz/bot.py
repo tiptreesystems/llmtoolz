@@ -34,7 +34,7 @@ from .utils import (
     DEFAULT_FLAGSHIP_MODEL,
     image_to_base64,
     find_text_under_header,
-    AltheaTimeoutException,
+    TimeoutException,
     format_string,
     get_path
 )
@@ -747,7 +747,7 @@ class Bot:
                 openai.error.Timeout,
                 openai.error.APIError,
                 openai.error.APIConnectionError,
-                AltheaTimeoutException,
+                TimeoutException,
             ),
             max_time=600,
         )
@@ -1118,7 +1118,7 @@ def embed(
             openai.error.ServiceUnavailableError,
             openai.error.Timeout,
             openai.error.APIError,
-            AltheaTimeoutException,
+            TimeoutException,
         ),
         max_time=180,
     )
@@ -1138,7 +1138,7 @@ def embed(
         openai.error.ServiceUnavailableError,
         openai.error.Timeout,
         openai.error.APIError,
-        AltheaTimeoutException,
+        TimeoutException,
     ),
     max_time=180,
 )

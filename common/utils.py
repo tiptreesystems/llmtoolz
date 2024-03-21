@@ -12,10 +12,6 @@ from enum import Enum
 from common.constants import PRICE_PER_KILOTOKEN
 
 
-class ResearchType(Enum):
-    PUBLIC_RESEARCH = "public_research"
-    EXPERT_RESEARCH = "expert_research"
-
 
 def get_git_root():
     try:
@@ -67,72 +63,3 @@ def get_key(name: str) -> Optional[str]:
         logger.error(f"Error: {keys_path} is not in valid JSON format.")
         return None
 
-
-class AltheaConfig:
-    def __init__(self, config: dict):
-        self.config = config
-
-    def get_attribute_for_service(
-        self, *, name: str, attribute: str, service_type: Optional[str] = None
-    ) -> Any:
-        service_type = "comm" if service_type is None else service_type
-        return self.config[f"{service_type}_services"][name][attribute]
-
-    def get_host_for_service(
-        self, name: str, service_type: Optional[str] = None
-    ) -> str:
-        return self.get_attribute_for_service(
-            name=name, attribute="host", service_type=service_type
-        )
-
-    def get_port_for_service(
-        self, name: str, service_type: Optional[str] = None
-    ) -> int:
-        return self.get_attribute_for_service(
-            name=name, attribute="port", service_type=service_type
-        )
-
-    def get_endpoint_for_service(
-        self, name: str, service_type: Optional[str] = None, prefix: str = "http://"
-    ) -> str:
-        host = self.get_host_for_service(name, service_type)
-        port = self.get_port_for_service(name, service_type)
-        return f"{prefix}{host}:{port}"
-
-    def get_token_for_service(
-        self, name: str, service_type: Optional[str] = None
-    ) -> str:
-        return self.get_attribute_for_service(
-            name=name, attribute="token", service_type=service_type
-        )
-
-    def get_beat_interval(self, default: int = 60, cycle_name: str = "short") -> int:
-        cycle_spec = self.config["beats"].get(f"{cycle_name}_cycle", {})
-        return cycle_spec.get("polling_interval", default)
-
-    def get_beat_thread_filter_config(self) -> dict:
-        return self.config["beats"].get("thread_filter_config", {})
-
-    @property
-    def app_config(self):
-        return self.config["app_config"]
-
-    def get_app_config(
-        self, key: str, default: Any = None, raise_when_not_found: bool = True
-    ):
-        if key not in self.config["app_config"] and raise_when_not_found:
-            raise KeyError(f"Key {key} not found in {self.config['app_config'].keys()}")
-        return self.config["app_config"].get(key, default)
-
-    @classmethod
-    def from_path(cls, path: str) -> "AltheaConfig":
-        with open(get_path(path, makedirs=False), "r") as file:
-            config = yaml.load(file, Loader=yaml.FullLoader)
-        return cls(config)
-
-    @classmethod
-    def from_env(cls, variable="ALTHEA_CONFIG_PATH") -> "AltheaConfig":
-        path = os.getenv(variable)
-        if path is None:
-            raise ValueError(f"Environment variable {variable} not set.")
-        return cls.from_path(path)

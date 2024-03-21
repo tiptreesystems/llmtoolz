@@ -196,23 +196,6 @@ class WebScraper:
             logger.debug(f"Goose for {url} failed with {e}")
         return None
 
-    def _fallback_to_newspaper3k(self, url):
-        # FIXME: Move this back up when integrated
-        from newspaper import Article
-
-        try:
-            article = Article(url)
-            article.download()
-            article.parse()
-            if article.text:
-                logger.debug(f"Newspaper3k worked. content: {article.text[:1000]}...")
-                return {"url": url, "title": article.title, "content": article.text}
-            else:
-                logger.debug(f"Newspaper3k for {url} failed with no text")
-        except Exception as e:
-            logger.debug(f"Newspaper3k for {url} failed with {e}")
-        return None
-
     @staticmethod
     def apify_crawl_url(url: str) -> Optional[Dict]:
         client = ApifyClient(get_key("apify"))
